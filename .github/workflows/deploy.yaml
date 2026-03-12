@@ -32,7 +32,7 @@ jobs:
       
       - name: upload into s3
         run: |
-          aws s3 sync dist/ s3://dev.console.q-pass.gr --delete
+          aws s3 sync dist/ s3://dev.console.q-pass.gr
           echo "S3 deployment complete!"
 
       - name: Invalidate CloudFront
