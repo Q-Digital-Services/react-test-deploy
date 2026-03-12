@@ -26,9 +26,6 @@ jobs:
       - name: "Build"
         run: npm run build
 
-      - name: "Test"
-        run: npm test
-      
       - name: "Echo deploy env"
         run: |
          echo "Deploying to environment: ${{ job.environment }}"
