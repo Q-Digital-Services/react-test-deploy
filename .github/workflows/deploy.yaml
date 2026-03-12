@@ -12,7 +12,7 @@ jobs:
     environment: ${{ github.ref == 'refs/heads/master' && 'PROD' || 'DEV' }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       
@@ -25,13 +25,34 @@ jobs:
       
       - name: "Build"
         run: npm run build
-      
+
       - name: "Echo deploy env"
         run: |
          echo "Deploying to environment: ${{ job.environment }}"
 
+      - name: Create Git tag from package.json
+        id: tag
+        if:  github.ref == 'refs/heads/master'
+        run: |
+          # Get version from package.json
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Version from package.json: $VERSION"
+
+          # Configure Git for tagging
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          # Create tag if it doesn't exist yet
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "Tag v$VERSION already exists, skipping."
+          else
+            git tag "v$VERSION"
+            git push origin "v$VERSION"
+            echo "Tag v$VERSION created and pushed."
+          fi
+
       - name: Configure AWS
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v6.0.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
