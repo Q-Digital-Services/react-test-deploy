@@ -1,18 +1,74 @@
-# React + Vite
+# React SPA Release Demo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A demo used to deploy a react SPA into aws cloudfront via github actions.
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Deployment Secrets & vars:
 
-## React Compiler
+The following secrets are used
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+Secret | Description
+--- | ---
+AWS_ACCESS_KEY_ID | User used for deploying upon AWS S3 BUCKETS
+AWS_SECRET_ACCESS_KEY | Aws secret
 
-Note: This will impact Vite dev & build performances.
+Whilst the following env vars should be defined
 
-## Expanding the ESLint configuration
+Name | Description
+--- | ---
+S3_BUCKET | The bucket where the app would be deployed upon
+CLOUDFRONT_DIST_ID | The cloudfront distribution to invalidate upon
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Each variable should be upon its respective github `Environment` as shown in `Settings`->`Environments` of this project.
+
+## Dev Release
+
+```
+git checkout dev
+git add .
+git commit -am "Stuff to commit"
+git push origin dev
+```
+
+## Prod release
+
+### Step 0: Checkout master and merge dev
+
+```
+git cherckout master
+# Is test is used use `test` branch instead
+git merge dev
+```
+
+### Step 1: Bump Version
+
+Patch eg. `0.0.0`->`0.0.1`
+
+```
+npm version patch
+```
+
+Minor eg `0.0.0`->`0.1.1`
+
+```
+npm version minor
+```
+
+Major eg `0.0.0`->`1.0.0`
+
+```
+npm version major
+```
+
+### Step2: Commit package.json
+
+```
+git add package.json
+git commit -am "Version Bump"
+```
+
+### Step3: Push
+
+```
+git push origin master
+```
