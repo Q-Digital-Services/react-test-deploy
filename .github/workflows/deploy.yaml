@@ -4,7 +4,15 @@ on:
   push:
     branches:
       - dev
+      - test
       - master
+    paths:
+      - .github/**
+      - index.html
+      - package.json
+      - package-lock.json
+      - ./src/**
+      - public/**
   workflow_dispatch:
     inputs:
       tag:
@@ -45,6 +53,7 @@ jobs:
         id: set_tag_version
         if:  github.event.inputs.custom_tag == '' && github.ref == 'refs/heads/master'
         run: |
+          version=$(node -p "require('./package.json').version")
           echo "tag_version=${{ steps.version.outputs.version }}" >> "$GITHUB_OUTPUT"
         
       - name: Tag version
