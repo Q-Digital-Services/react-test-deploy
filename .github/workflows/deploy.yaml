@@ -1,0 +1,43 @@
+name: release
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 'lts/*'
+      
+      - name: "Install dependencies"
+        run: npm ci
+      
+      - name: "Build"
+        run: npm run build
+      
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+      
+      - name: upload into s3
+        run: |
+          aws s3 sync build/ s3://my-react-app-bucket --delete
+          echo "S3 deployment complete!"
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DIST_ID }} \
+            --paths "/*"
+          echo "CloudFront invalidation requested!"
