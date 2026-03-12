@@ -30,26 +30,22 @@ jobs:
         run: |
          echo "Deploying to environment: ${{ job.environment }}"
 
-      - name: Create Git tag from package.json
-        id: tag
-        if:  github.ref == 'refs/heads/master'
+      - name: Set tag version
+        id: set_tag_version
         run: |
-          # Get version from package.json
-          VERSION=$(node -p "require('./package.json').version")
-          echo "Version from package.json: $VERSION"
-
-          # Configure Git for tagging
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
-          # Create tag if it doesn't exist yet
-          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-            echo "Tag v$VERSION already exists, skipping."
+          if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
+            echo "tag_version=${{ steps.version.outputs.version }}-dev" >> "$GITHUB_OUTPUT"
           else
-            git tag "v$VERSION"
-            git push origin "v$VERSION"
-            echo "Tag v$VERSION created and pushed."
+            echo "tag_version=${{ steps.version.outputs.version }}" >> "$GITHUB_OUTPUT"
           fi
+      
+      - name: Tag version
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ steps.set_tag_version.outputs.tag_version }}
+
 
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v6.0.0
