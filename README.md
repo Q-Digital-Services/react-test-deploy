@@ -72,3 +72,13 @@ git commit -am "Version Bump"
 ```
 git push origin master
 ```
+
+### Rollback:
+
+You can rollback a version like this:
+
+```
+gh workflow run "release" --ref master --field tag=v0.0.2
+```
+
+Replace `v0.0.2` with your own version.
