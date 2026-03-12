@@ -4,10 +4,13 @@ on:
   push:
     branches:
       - dev
+      - master
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/master' && 'PROD' || 'DEV' }}
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,6 +26,10 @@ jobs:
       - name: "Build"
         run: npm run build
       
+      - name: "Echo deploy env"
+        run: |
+         echo "Deploying to environment: ${{ job.environment }}"
+
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -32,12 +39,12 @@ jobs:
       
       - name: upload into s3
         run: |
-          aws s3 cp dist/ s3://dev.console.q-pass.gr --recursive
+          aws s3 cp dist/ s3://${{ vars.S3_BUCKET }} --recursive
           echo "S3 deployment complete!"
 
       - name: Invalidate CloudFront
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DIST_ID }} \
+            --distribution-id ${{ vars.CLOUDFRONT_DIST_ID }} \
             --paths "/*"
           echo "CloudFront invalidation requested!"
