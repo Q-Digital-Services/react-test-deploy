@@ -32,7 +32,7 @@ jobs:
       
       - name: upload into s3
         run: |
-          aws s3 sync build/ s3://my-react-app-bucket --delete
+          aws s3 cp dist/ s3://dev.console.q-pass.gr --recursive
           echo "S3 deployment complete!"
 
       - name: Invalidate CloudFront
