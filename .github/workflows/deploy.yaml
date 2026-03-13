@@ -28,6 +28,7 @@ jobs:
     steps:
 
       - name: Print tag
+        if: github.event.inputs.tag == ''
         run: echo "Deploying tag ${{ github.event.inputs.tag }}"
 
       - uses: actions/checkout@v5
